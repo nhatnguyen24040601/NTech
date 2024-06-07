@@ -3,6 +3,7 @@ import { defaultStyles } from '@/constants/Styles';
 import { Ionicons } from '@expo/vector-icons';
 import { Link, useRouter } from 'expo-router';
 import { useState } from 'react';
+import { isClerkAPIResponseError, useSignIn } from '@clerk/clerk-expo';
 import {
   View,
   Text,
@@ -26,40 +27,40 @@ const Page = () => {
   const [phoneNumber, setPhoneNumber] = useState('');
   const keyboardVerticalOffset = Platform.OS === 'ios' ? 80 : 0;
   const router = useRouter();
-//   const { signIn } = useSignIn();
+  const { signIn } = useSignIn();
 
   const onSignIn = async (type: SignInType) => {
-    // if (type === SignInType.Phone) {
-    //   try {
-    //     const fullPhoneNumber = `${countryCode}${phoneNumber}`;
+    if (type === SignInType.Phone) {
+      try {
+        const fullPhoneNumber = `${countryCode}${phoneNumber}`;
 
-    //     const { supportedFirstFactors } = await signIn!.create({
-    //       identifier: fullPhoneNumber,
-    //     });
-    //     const firstPhoneFactor: any = supportedFirstFactors.find((factor: any) => {
-    //       return factor.strategy === 'phone_code';
-    //     });
+        const { supportedFirstFactors } = await signIn!.create({
+          identifier: fullPhoneNumber,
+        });
+        const firstPhoneFactor: any = supportedFirstFactors.find((factor: any) => {
+          return factor.strategy === 'phone_code';
+        });
 
-    //     const { phoneNumberId } = firstPhoneFactor;
+        const { phoneNumberId } = firstPhoneFactor;
 
-    //     await signIn!.prepareFirstFactor({
-    //       strategy: 'phone_code',
-    //       phoneNumberId,
-    //     });
+        await signIn!.prepareFirstFactor({
+          strategy: 'phone_code',
+          phoneNumberId,
+        });
 
-    //     router.push({
-    //       pathname: '/verify/[phone]',
-    //       params: { phone: fullPhoneNumber, signin: 'true' },
-    //     });
-    //   } catch (err) {
-    //     console.log('error', JSON.stringify(err, null, 2));
-    //     if (isClerkAPIResponseError(err)) {
-    //       if (err.errors[0].code === 'form_identifier_not_found') {
-    //         Alert.alert('Error', err.errors[0].message);
-    //       }
-    //     }
-    //   }
-    // }
+        router.push({
+          pathname: '/verify/[phone]',
+          params: { phone: fullPhoneNumber, signin: 'true' },
+        });
+      } catch (err) {
+        console.log('error', JSON.stringify(err, null, 2));
+        if (isClerkAPIResponseError(err)) {
+          if (err.errors[0].code === 'form_identifier_not_found') {
+            Alert.alert('Error', err.errors[0].message);
+          }
+        }
+      }
+    }
   };
 
   return (
@@ -125,7 +126,8 @@ const Page = () => {
         </TouchableOpacity>
 
         <TouchableOpacity
-          onPress={() => onSignIn(SignInType.Google)}
+          // onPress={() => onSignIn(SignInType.Google)}
+          onPress={() => router.navigate('/')}
           style={[
             defaultStyles.pillButton,
             {

@@ -2,6 +2,7 @@ import Colors from '@/constants/Colors';
 import { defaultStyles } from '@/constants/Styles';
 import { Link, useRouter } from 'expo-router';
 import { useState } from 'react';
+import { useSignUp } from '@clerk/clerk-expo';
 import {
   View,
   Text,
@@ -16,20 +17,21 @@ const Page = () => {
   const [phoneNumber, setPhoneNumber] = useState('');
   const keyboardVerticalOffset = Platform.OS === 'ios' ? 80 : 0;
   const router = useRouter();
+  const { signUp } = useSignUp();
 
   const onSignup = async () => {
     const fullPhoneNumber = `${countryCode}${phoneNumber}`;
 
-    // try {
-    //   await signUp!.create({
-    //     phoneNumber: fullPhoneNumber,
-    //   });
-    //   signUp!.preparePhoneNumberVerification();
+    try {
+      await signUp!.create({
+        phoneNumber: fullPhoneNumber,
+      });
+      signUp!.preparePhoneNumberVerification();
 
-    //   router.push({ pathname: '/verify/[phone]', params: { phone: fullPhoneNumber } });
-    // } catch (error) {
-    //   console.error('Error signing up:', error);
-    // }
+      router.push({ pathname: '/verify/[phone]', params: { phone: fullPhoneNumber } });
+    } catch (error) {
+      console.error('Error signing up:', error);
+    }
   };
 
   return (
